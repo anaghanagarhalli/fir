@@ -1,0 +1,102 @@
+Cadence Genus(TM) Synthesis Solution.
+Copyright 2022 Cadence Design Systems, Inc. All rights reserved worldwide.
+Cadence and the Cadence logo are registered trademarks and Genus is a trademark
+of Cadence Design Systems, Inc. in the United States and other countries.
+
+[14:41:45.328602] Configured Lic search path (21.01-s002): 5281@14.139.1.126:1717@14.139.1.126
+
+Version: 21.14-s082_1, built Thu Jun 23 02:02:08 PDT 2022
+Options: -files areaall.tcl 
+Date:    Thu Aug 27 14:41:45 2026
+Host:    cad312vitcc.vit.ac.in (x86_64 w/Linux 4.18.0-553.150.1.el8_10.x86_64) (16cores*64cpus*2physical cpus*INTEL(R) XEON(R) GOLD 6526Y 38400KB) (2112776988KB)
+PID:     1484460
+OS:      Red Hat Enterprise Linux release 8.10 (Ootpa)
+
+Checkout succeeded: Genus_Synthesis/3FFB3787901511A9760E
+	License file: 5281@14.139.1.126
+	License Server: 5281@14.139.1.126
+
+[14:41:46.206392] Periodic Lic check successful
+[14:41:46.206401] Feature usage summary:
+[14:41:46.206401] Genus_Synthesis
+Checking out license: Genus_Synthesis
+
+
+***********************************************************************************************************
+***********************************************************************************************************
+
+
+
+Loading tool scripts...
+Finished loading tool scripts (5 seconds elapsed).
+
+#@ Processing -files option
+@genus 1> source areaall.tcl
+#@ Begin verbose source ./areaall.tcl
+@file(areaall.tcl) 1: set TOP_MODULE "fir_4tap_shared_mult"
+@file(areaall.tcl) 2: set HDL_DIR "/home/vlsi36/24bvd1030/firtask/FIR_LAB/fir_area_optimized"
+@file(areaall.tcl) 4: set TECH_NODES {"45nm" "90nm" "180nm"}
+@file(areaall.tcl) 5: set LIB_CORNERS {"slow" "fast" "typical"}
+@file(areaall.tcl) 7: file mkdir output/netlist
+@file(areaall.tcl) 8: file mkdir output/constrints
+@file(areaall.tcl) 9: file mkdir output/reports
+@file(areaall.tcl) 11: foreach node $TECH_NODES {
+    foreach corner $LIB_CORNERS {
+
+        # Properly purge previous designs and loaded libraries
+        if {[llength [get_db designs]] > 0} {
+            delete_obj [get_db designs *]
+        }
+        if {[llength [get_db loaded_libraries]] > 0} {
+            delete_obj [get_db loaded_libraries *]
+        }
+
+        puts "\n=========================================================="
+        puts " [RUN] Module: $TOP_MODULE | Tech: $node | Corner: $corner"
+        puts "==========================================================\n"
+
+        set_db init_lib_search_path "/home/install/FOUNDRY/digital/${node}/dig/lib"
+        set_db init_hdl_search_path $HDL_DIR
+
+        read_libs "${corner}.lib"
+        read_hdl "${TOP_MODULE}.v"
+        elaborate $TOP_MODULE
+        read_sdc "${TOP_MODULE}.sdc"
+
+        set_db syn_generic_effort medium
+        set_db syn_map_effort medium
+        set_db syn_opt_effort medium
+
+        syn_generic
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_generic.v"
+
+        syn_map
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_mapped.v"
+
+        syn_opt
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_opt.v"
+
+        write_sdc > "output/constrints/${TOP_MODULE}_${node}_${corner}_synth.sdc"
+
+        report_timing > "output/reports/${TOP_MODULE}_${node}_${corner}_timing.rpt"
+        report_power  > "output/reports/${TOP_MODULE}_${node}_${corner}_power.rpt"
+        report_area   > "output/reports/${TOP_MODULE}_${node}_${corner}_area.rpt"
+        report_gates  > "output/reports/${TOP_MODULE}_${node}_${corner}_gates.rpt"
+        report_qor    > "output/reports/${TOP_MODULE}_${node}_${corner}_qor.rpt"
+    }
+}
+Error   : <Start> word is not recognized. [TUI-182] [get_db]
+        : 'loaded_libraries' is not a recognized object/attribute. Type 'help root:' to get a list of all supported objects and attributes.
+        : Check if the given <Start> word is a valid object_type, object or attribute.
+#@ End verbose source ./areaall.tcl
+1
+Encountered problems processing file: areaall.tcl
+WARNING: This version of the tool is 1526 days old.
+@genus:root: 2> exit
+
+Lic Summary:
+[14:42:24.138514] Cdslmd servers: cadence-c2s
+[14:42:24.138521] Feature usage summary:
+[14:42:24.138522] Genus_Synthesis
+
+Normal exit.

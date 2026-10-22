@@ -1,0 +1,137 @@
+Cadence Genus(TM) Synthesis Solution.
+Copyright 2022 Cadence Design Systems, Inc. All rights reserved worldwide.
+Cadence and the Cadence logo are registered trademarks and Genus is a trademark
+of Cadence Design Systems, Inc. in the United States and other countries.
+
+[14:36:38.328650] Configured Lic search path (21.01-s002): 5281@14.139.1.126:1717@14.139.1.126
+
+Version: 21.14-s082_1, built Thu Jun 23 02:02:08 PDT 2022
+Options: -files areaall.tcl 
+Date:    Thu Aug 27 14:36:38 2026
+Host:    cad312vitcc.vit.ac.in (x86_64 w/Linux 4.18.0-553.150.1.el8_10.x86_64) (16cores*64cpus*2physical cpus*INTEL(R) XEON(R) GOLD 6526Y 38400KB) (2112776988KB)
+PID:     1477559
+OS:      Red Hat Enterprise Linux release 8.10 (Ootpa)
+
+Checkout succeeded: Genus_Synthesis/3FFB3787901511A9760E
+	License file: 5281@14.139.1.126
+	License Server: 5281@14.139.1.126
+
+[14:36:39.473729] Periodic Lic check successful
+[14:36:39.473738] Feature usage summary:
+[14:36:39.473739] Genus_Synthesis
+Checking out license: Genus_Synthesis
+
+
+***********************************************************************************************************
+***********************************************************************************************************
+
+
+
+Loading tool scripts...
+Finished loading tool scripts (5 seconds elapsed).
+
+#@ Processing -files option
+@genus 1> source areaall.tcl
+#@ Begin verbose source ./areaall.tcl
+@file(areaall.tcl) 7: set TOP_MODULE "fir_4tap_shared_mult"
+@file(areaall.tcl) 8: set HDL_DIR "/home/vlsi36/24bvd1030/firtask/FIR_LAB/fir_area_optimized"
+@file(areaall.tcl) 11: set TECH_NODES {"45nm" "90nm" "180nm"}
+@file(areaall.tcl) 12: set LIB_CORNERS {"slow" "fast" "typical"}
+@file(areaall.tcl) 15: file mkdir output/netlist
+@file(areaall.tcl) 16: file mkdir output/constrints
+@file(areaall.tcl) 17: file mkdir output/reports
+@file(areaall.tcl) 19: foreach node $TECH_NODES {
+    foreach corner $LIB_CORNERS {
+
+        # Reset Genus database state for the next iteration
+        delete_obj /
+
+        puts "\n=========================================================="
+        puts " [RUN] Module: $TOP_MODULE | Tech: $node | Corner: $corner"
+        puts "==========================================================\n"
+
+        # Set search paths dynamically
+        set_db init_lib_search_path "/home/install/FOUNDRY/digital/${node}/dig/lib"
+        set_db init_hdl_search_path $HDL_DIR
+
+        # Load library, design, and constraints
+        # Note: Adjust corner filename below if your typical lib is named 'typ.lib'
+        read_libs "${corner}.lib"
+        read_hdl "${TOP_MODULE}.v"
+        elaborate $TOP_MODULE
+        read_sdc "${TOP_MODULE}.sdc"
+
+        # Synthesis effort settings
+        set_db syn_generic_effort medium
+        set_db syn_map_effort medium
+        set_db syn_opt_effort medium
+
+        # Run Synthesis Steps
+        syn_generic
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_generic.v"
+
+        syn_map
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_mapped.v"
+
+        syn_opt
+        write_hdl > "output/netlist/${TOP_MODULE}_${node}_${corner}_opt.v"
+
+        write_sdc > "output/constrints/${TOP_MODULE}_${node}_${corner}_synth.sdc"
+
+        # Generate unique report filenames per combination
+        report_timing > "output/reports/${TOP_MODULE}_${node}_${corner}_timing.rpt"
+        report_power  > "output/reports/${TOP_MODULE}_${node}_${corner}_power.rpt"
+        report_area   > "output/reports/${TOP_MODULE}_${node}_${corner}_area.rpt"
+        report_gates  > "output/reports/${TOP_MODULE}_${node}_${corner}_gates.rpt"
+        report_qor    > "output/reports/${TOP_MODULE}_${node}_${corner}_qor.rpt"
+    }
+}
+Error   : Cannot remove object. [TUI-52] [delete_obj]
+        : Cannot remove root:.
+        : Use 'delete_obj -help' to see the list of valid removable object types.
+#@ End verbose source ./areaall.tcl
+1
+Encountered problems processing file: areaall.tcl
+WARNING: This version of the tool is 1526 days old.
+@genus:root: 2> 'delete_obj -help'
+invalid command name "'delete_obj"
+@genus:root: 3> delete_obj -help
+  delete_obj: removes an object 
+
+Usage: delete_obj [-quiet] <object>+
+
+    [-quiet]:
+        keeps quiet unless there are problems 
+    <object>+:
+        objects to remove. The following are valid removable object types: 
+
+        actual_scan_chain                      external_delay                           library_domain                           opcond                                   sdp_instance 
+        analysis_view                          extraction_grid                          library_set                              osc_source                               sdp_row 
+        arc                                    fill                                     macro_isolation_rule                     osc_source_reference                     slot 
+        attribute                              flow                                     mbist_clock                              pcell                                    specialnet 
+        base_cell_set                          flow_step                                memory_bank_structure                    pdomain                                  style 
+        blackbox                               formal_verification_constraint           memory_data_bit_structure                pinstance                                tap_port 
+        blockage                               fpobject                                 memory_lib_cell                          place_blockage                           test_bus_interface 
+        boundary_scan_segment                  fuse_cell                                memory_lib_pin_access                    pmbist_port                              test_bus_port 
+        bump                                   fuse_cell_domain                         memory_lib_pin_action                    pnet                                     test_clock 
+        clock                                  gcell                                    memory_lib_pin_alias                     port_bus                                 test_clock_domain 
+        cluster                                gcell_grid                               memory_lib_pin_test                      programmable_direct_access_function      test_signal 
+        congestion_box                         group                                    memory_library_domain                    rc_corner                                timing_bin 
+        constraint_mode                        hinst                                    memory_spare_column                      region                                   timing_condition 
+        cost_group                             hpin_bus                                 memory_spare_column_map_address          route_blockage                           timing_path 
+        ctp_source                             hport_bus                                memory_spare_column_map_data             route_rule                               timing_point 
+        def_pin                                inst                                     memory_spare_row                         route_type                               track_pattern 
+        delay_corner                           jtag_instruction                         memory_spare_row_map_address             row                                      via 
+        design                                 jtag_instruction_register                mode                                     scan_chain                               virtual_techelt 
+        dft_configuration_mode                 jtag_macro                               opcg_domain                              scan_segment                             write_mask_bit 
+        domain_macro_parameter                 jtag_port                                opcg_mode                                sdp_column                               exception 
+        level_shifter_group                    opcg_trigger                             sdp_group                                
+
+@genus:root: 4> exit
+
+Lic Summary:
+[14:40:58.326480] Cdslmd servers: cadence-c2s
+[14:40:58.326490] Feature usage summary:
+[14:40:58.326491] Genus_Synthesis
+
+Normal exit.
